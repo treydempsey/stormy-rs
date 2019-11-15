@@ -1,0 +1,25 @@
+owners = []
+nickname = "bawt"
+alt_nicks = ["stormy", "user__"]
+username = "bawt"
+realname = "Bawt"
+server = "irc.servercentral.net"
+port = 6667
+use_ssl = false
+encoding = "UTF-8"
+channels = ["#trey", "#linuxgeneration"]
+umodes = "+RB-x"
+user_info = "I'm a bawt."
+version = "irc:git:Rust"
+source = "https://github.com/aatxe/irc"
+ping_time = 180
+ping_timeout = 10
+burst_window_length = 8
+max_messages_in_burst = 15
+should_ghost = false
+ghost_sequence = []
+
+[options]
+note = "anything you want can be in here!"
+and = "you can use it to build your own additional configuration options."
+key = "value"
