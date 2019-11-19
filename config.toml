@@ -1,13 +1,13 @@
 owners = []
-nickname = "bawt"
-alt_nicks = ["stormy", "user__"]
-username = "bawt"
-realname = "Bawt"
+nickname = "stormy"
+alt_nicks = ["stormyrs", "sunnyrs"]
+username = "Stormy"
+realname = "Stormy"
 server = "irc.servercentral.net"
 port = 6667
 use_ssl = false
 encoding = "UTF-8"
-channels = ["#trey", "#linuxgeneration"]
+channels = ["#stormy-rs"]
 umodes = "+RB-x"
 user_info = "I'm a bawt."
 version = "irc:git:Rust"
@@ -20,6 +20,4 @@ should_ghost = false
 ghost_sequence = []
 
 [options]
-note = "anything you want can be in here!"
-and = "you can use it to build your own additional configuration options."
-key = "value"
+openweathermap_appid = ""
