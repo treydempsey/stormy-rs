@@ -7,7 +7,7 @@ use hyper::Client;
 use url::Url;
 
 pub fn city(appid: &str, message: String) -> impl Future<Item = String, Error = Error> {
-    let city = message.trim_start_matches("pickles").trim();
+    let city = message.trim_start_matches("!w").trim();
     
     match Url::parse_with_params("http://api.openweathermap.org/data/2.5/weather", &[("q", city), ("appid", appid)]) {
         Ok(api_url) => {

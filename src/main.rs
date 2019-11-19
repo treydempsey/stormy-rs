@@ -26,7 +26,7 @@ fn process_message(reactor_handle: Rc<reactor::Handle>, irc_client: Rc<IrcClient
 {
     println!("{:?}", message);
     if let Command::PRIVMSG(ref _target, ref msg) = message.command {
-        if msg.contains("pickles") {
+        if msg.starts_with("!w ") {
             let irc_client = Rc::clone(&irc_client);
 
             match irc_client.config().get_option("openweathermap_appid") {
