@@ -1,42 +1,55 @@
 // vim: et sw=4 ts=4
 
+extern crate chrono;
 extern crate hyper;
 extern crate irc;
 extern crate serde;
 extern crate serde_json;
 extern crate tokio_core;
+extern crate url;
 
+mod formatters;
 mod open_weather_map;
 
+use std::rc::Rc;
+
+use formatters::standard;
 use futures::Future;
 use futures::IntoFuture;
 use irc::client::prelude::*;
 use irc::client::Client;
 use tokio_core::reactor;
 
-use std::rc::Rc;
-
-fn _format_message(_response: open_weather_map::response::City) {
-}
+use open_weather_map::response::CityResponse;
 
 fn process_message(reactor_handle: Rc<reactor::Handle>, irc_client: Rc<IrcClient>, message: Message) -> Result<(), irc::error::IrcError>
 {
-    println!("Message: {:?}", message);
+    println!("{:?}", message);
     if let Command::PRIVMSG(ref _target, ref msg) = message.command {
         if msg.contains("pickles") {
             let irc_client = Rc::clone(&irc_client);
-            let target = message.response_target().unwrap().to_owned();
-            let response = open_weather_map::query::city(msg.clone())
-                .and_then(move |body| {
-                    match serde_json::from_str::<open_weather_map::response::City>(&body) {
-                        Ok(data) => println!("Data: {:?}", data),
-                        Err(e) => println!("Error: {:?}", e),
-                    }
-                    Rc::clone(&irc_client).send_privmsg(target, body).unwrap();
-                    Ok(())
-                });
 
-            reactor_handle.spawn(response);
+            match irc_client.config().get_option("openweathermap_appid") {
+                Some(appid) => {
+                    let target = message.response_target().unwrap().to_owned();
+                    let response = open_weather_map::query::city(appid, msg.clone())
+                        .and_then(move |body| {
+                            println!("Body: {}", body);
+                            match serde_json::from_str::<CityResponse>(&body) {
+                                Ok(CityResponse::City(data)) => irc_client.send_privmsg(target, standard::format(&data)).unwrap(),
+                                Ok(CityResponse::ApiError(error)) => irc_client.send_privmsg(target, format!("Error: {}", error)).unwrap(),
+                                Err(e) => println!("Error decoding API response: {:?}", e),
+                            }
+                            Ok(())
+                        })
+                        .map_err(|e| {
+                            println!("Error requesting API response: {:?}", e);
+                        });
+
+                    reactor_handle.spawn(response);
+                }
+                None => irc_client.send_privmsg(message.response_target().unwrap(), format!("Error: I can't find my Open Weather Map API Key. Set openweathermap_appid in my config.toml.")).unwrap(),
+            }
         }
     }
     Ok(())

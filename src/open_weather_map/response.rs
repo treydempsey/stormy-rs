@@ -1,83 +1,113 @@
+use std::fmt;
+
+use chrono::{DateTime, Utc};
+use chrono::serde::ts_seconds;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
+#[serde(untagged)]
+pub enum CityResponse {
+    City(City),
+    ApiError(ApiError),
+}
+
+#[derive(Deserialize, Debug)]
 pub struct City {
-    base: Option<String>,
-    clouds: Option<Clouds>,
-    cod: Option<u32>,
-    coord: Option<Coord>,
-    dt: Option<u64>,
-    id: Option<u64>,
-    main: Option<Main>,
-    name: Option<String>,
-    rain: Option<Rain>,
-    snow: Option<Snow>,
-    sys: Option<Sys>,
-    timezone: Option<i32>,
-    visibility: Option<u32>,
-    wind: Option<Wind>,
-    weather: Option<Vec<Condition>>,
+    pub base: Option<String>,
+    pub clouds: Option<Clouds>,
+    pub cod: Option<u32>,
+    pub coord: Option<Coord>,
+    #[serde(with = "ts_seconds")]
+    pub dt: DateTime<Utc>,
+    pub id: Option<u64>,
+    pub main: Option<Main>,
+    pub name: Option<String>,
+    pub rain: Option<Rain>,
+    pub snow: Option<Snow>,
+    pub sys: Option<Sys>,
+    pub timezone: Option<i32>,
+    pub visibility: Option<u32>,
+    pub wind: Option<Wind>,
+    pub weather: Option<Vec<Condition>>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct ApiError {
+    pub cod: Option<String>,
+    pub message: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Clouds {
-    all: Option<u8>,
+    pub all: Option<u8>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Condition {
-    icon: Option<String>,
-    id: Option<u64>,
-    description: Option<String>,
-    main: Option<String>,
+    pub icon: Option<String>,
+    pub id: Option<u64>,
+    pub description: Option<String>,
+    pub main: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Coord {
-    lat: Option<f32>,
-    lon: Option<f32>,
+    pub lat: Option<f32>,
+    pub lon: Option<f32>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Main {
-    grnd_level: Option<u32>,
-    humidity: Option<u8>,
-    pressure: Option<u32>,
-    sea_level: Option<u32>,
-    temp: Option<f32>,
-    temp_max: Option<f32>,
-    temp_min: Option<f32>,
+    pub grnd_level: Option<u32>,
+    pub humidity: Option<u8>,
+    pub pressure: Option<u32>,
+    pub sea_level: Option<u32>,
+    pub temp: Option<f32>,
+    pub temp_max: Option<f32>,
+    pub temp_min: Option<f32>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Rain {
     #[serde(alias = "1h")]
-    one_hour: Option<f32>,
+    pub one_hour: Option<f32>,
     #[serde(alias = "3h")]
-    three_hour: Option<f32>,
+    pub three_hour: Option<f32>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Snow {
     #[serde(alias = "1h")]
-    one_hour: Option<f32>,
+    pub one_hour: Option<f32>,
     #[serde(alias = "3h")]
-    three_hour: Option<f32>,
+    pub three_hour: Option<f32>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Sys {
     #[serde(alias = "type")]
-    type_: Option<u32>,
-    id: Option<u64>,
-    message: Option<String>,
-    country: Option<String>,
-    sunrise: Option<u64>,
-    sunset: Option<u64>,
+    pub type_: Option<u32>,
+    pub id: Option<u64>,
+    pub message: Option<String>,
+    pub country: Option<String>,
+    #[serde(with = "ts_seconds")]
+    pub sunrise: DateTime<Utc>,
+    #[serde(with = "ts_seconds")]
+    pub sunset: DateTime<Utc>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Wind {
-    deg: Option<u16>,
-    speed: Option<f32>,
+    pub deg: Option<f32>,
+    pub speed: Option<f32>,
+}
+
+impl fmt::Display for ApiError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let no_code = String::from("0");
+        let cod = self.cod.as_ref().unwrap_or(&no_code);
+        let no_message = String::from("<no message>");
+        let message = self.message.as_ref().unwrap_or(&no_message);
+        write!(f, "{}: {}", cod, message)
+    }
 }
