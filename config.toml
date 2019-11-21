@@ -1,5 +1,5 @@
 owners = []
-nickname = "stormy"
+nickname = "bawt"
 alt_nicks = ["stormyrs", "sunnyrs"]
 username = "Stormy"
 realname = "Stormy"
@@ -7,7 +7,7 @@ server = "irc.servercentral.net"
 port = 6667
 use_ssl = false
 encoding = "UTF-8"
-channels = ["#stormy-rs"]
+channels = ["#linuxgeneration", "#trey"]
 umodes = "+RB-x"
 user_info = "I'm a bawt."
 version = "irc:git:Rust"
@@ -20,4 +20,4 @@ should_ghost = false
 ghost_sequence = []
 
 [options]
-openweathermap_appid = ""
+openweathermap_appid = "8aa923241cb3621dcb8ffb6f9b45e0c8"

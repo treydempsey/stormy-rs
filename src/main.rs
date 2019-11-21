@@ -2,25 +2,27 @@
 
 extern crate chrono;
 extern crate hyper;
+extern crate hyper_tls;
 extern crate irc;
 extern crate serde;
 extern crate serde_json;
 extern crate tokio_core;
 extern crate url;
 
-mod formatters;
-mod open_weather_map;
+mod dark_sky;
+mod serde_utils;
+//mod formatters;
 
 use std::rc::Rc;
 
-use formatters::standard;
+//use formatters::standard;
 use futures::Future;
 use futures::IntoFuture;
 use irc::client::prelude::*;
 use irc::client::Client;
 use tokio_core::reactor;
 
-use open_weather_map::response::CityResponse;
+//use open_weather_map::response::CityResponse;
 
 fn process_message(reactor_handle: Rc<reactor::Handle>, irc_client: Rc<IrcClient>, message: Message) -> Result<(), irc::error::IrcError>
 {
@@ -29,17 +31,14 @@ fn process_message(reactor_handle: Rc<reactor::Handle>, irc_client: Rc<IrcClient
         if msg.starts_with("!w ") {
             let irc_client = Rc::clone(&irc_client);
 
-            match irc_client.config().get_option("openweathermap_appid") {
-                Some(appid) => {
+            match irc_client.config().get_option("darksky_key") {
+                Some(key) => {
                     let target = message.response_target().unwrap().to_owned();
-                    let response = open_weather_map::query::city(appid, msg.clone())
-                        .and_then(move |body| {
-                            println!("Body: {}", body);
-                            match serde_json::from_str::<CityResponse>(&body) {
-                                Ok(CityResponse::City(data)) => irc_client.send_privmsg(target, standard::format(&data)).unwrap(),
-                                Ok(CityResponse::ApiError(error)) => irc_client.send_privmsg(target, format!("Error: {}", error)).unwrap(),
-                                Err(e) => println!("Error decoding API response: {:?}", e),
-                            }
+                    let (latitude, longitude) = (29.7594,-95.3594);
+                    let response = dark_sky::forecast(key, latitude, longitude)
+                        .and_then(move |forecast| {
+                            println!("Forecast: {:?}", forecast);
+                            irc_client.send_privmsg(target, format!("{:?}", forecast)).unwrap();
                             Ok(())
                         })
                         .map_err(|e| {

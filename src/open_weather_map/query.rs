@@ -2,9 +2,10 @@ use futures::Future;
 use futures::future::{Either, err, ok};
 use futures::stream::Stream;
 
-use crate::open_weather_map::error::Error;
 use hyper::Client;
 use url::Url;
+
+use super::error::Error;
 
 pub fn city(appid: &str, message: String) -> impl Future<Item = String, Error = Error> {
     let city = message.trim_start_matches("!w").trim();
@@ -34,7 +35,7 @@ pub fn city(appid: &str, message: String) -> impl Future<Item = String, Error = 
         }
         Err(e) => {
             println!("Error parsing: {}", e);
-            Either::B(err(Error::Error("Error parsing API response".to_owned())))
+            Either::B(err(Error::Error("Error parsing URL".to_owned())))
         }
     }
 }
